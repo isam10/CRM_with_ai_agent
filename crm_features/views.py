@@ -11,7 +11,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from markdownify.templatetags.markdownify import markdownify
+from markdownify import markdownify
 from .ai.churnpredict import predictions
 import os
 import json 
