@@ -1,0 +1,142 @@
+{% extends "main.html" %}
+
+{% block title %}Sales Report{% endblock %}
+
+{% block content %}
+
+<div class="card text-center">
+  <div class="card-header">
+    📊 Report Generation
+  </div>
+  <div class="card-body">
+
+    {% if displayGraph %}
+      <div class="row mb-4">
+        <div class="col-md-8">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title m-0">Weekly Sales Performance</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="weeklySalesChart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title m-0">Monthly Sales Performance</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="monthlySalesChart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-8">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title m-0">Yearly Sales Performance</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="yearlySalesChart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-header bg-white">
+              <h5 class="card-title m-0">Sales By Region</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="regionSalesChart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="
+        text-align: justify;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        line-height: 1.6;
+        white-space: pre-wrap;
+      ">
+        <a href="{% url 'download_pdf' %}" class="btn btn-outline-secondary mb-2">
+          <i class="bi bi-download"></i> Download PDF
+        </a>
+
+        <div class="markdown-content">
+          {{ summary|safe }}
+        </div>
+      </div>
+
+      <!-- Add JSON data for the charts -->
+      <script id="weeklySalesData" type="application/json">
+        {{ weekly_sales_data|safe }}
+      </script>
+      <script id="monthlySalesData" type="application/json">
+        {{ monthly_sales_data|safe }}
+      </script>
+      <script id="yearlySalesData" type="application/json">
+        {{ yearly_sales_data|safe }}
+      </script>
+      <script id="regionSalesData" type="application/json">
+        {{ region_sales_data|safe }}
+      </script>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const weeklySalesCtx = document.getElementById('weeklySalesChart').getContext('2d');
+        const monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+        const yearlySalesCtx  = document.getElementById('yearlySalesChart').getContext('2d');
+        const regionSalesCtx  = document.getElementById('regionSalesChart').getContext('2d');
+
+        const weeklySalesData = JSON.parse(document.getElementById("weeklySalesData").textContent);
+        const monthlySalesData = JSON.parse(document.getElementById("monthlySalesData").textContent);
+        const yearlySalesData  = JSON.parse(document.getElementById("yearlySalesData").textContent);
+        const regionSalesData  = JSON.parse(document.getElementById("regionSalesData").textContent);
+
+        // Set responsive options for all charts
+        const chartOptions = {
+          responsive: true,
+          maintainAspectRatio: false
+        };
+
+        // Apply options to each chart configuration
+        weeklySalesData.options = {...weeklySalesData.options, ...chartOptions};
+        monthlySalesData.options = {...monthlySalesData.options, ...chartOptions};
+        yearlySalesData.options = {...yearlySalesData.options, ...chartOptions};
+        regionSalesData.options = {...regionSalesData.options, ...chartOptions};
+
+        new Chart(weeklySalesCtx, weeklySalesData);
+        new Chart(monthlySalesCtx, monthlySalesData);
+        new Chart(yearlySalesCtx, yearlySalesData);
+        new Chart(regionSalesCtx, regionSalesData);
+      </script>
+
+    {% else %}
+      {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+      {% elif loading %}
+        <div class="spinner-grow" role="status"></div>
+      {% else %}
+        <h5 class="card-title">Generate Sales Report</h5>
+        <p class="card-text">Click the button below to generate a detailed sales report with trends and insights.</p>
+        <form method="post">
+          {% csrf_token %}
+          <button class="btn btn-primary d-flex align-items-center gap-2 mx-auto" type="submit">
+            <i class="bi bi-file-earmark-bar-graph"></i> Generate Report
+          </button>
+        </form>
+      {% endif %}
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
